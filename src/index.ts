@@ -11,8 +11,9 @@
  * todo: feature to provide a ui to edit the generated configuration.
  */
 import yaml from 'js-yaml';
-import ruleSet from './rules';
+import rules, {ruleSet} from './rules';
 import { ClashProxy, ClashYaml } from './types';
+import meta from './meta';
 
 
 function parseVmess(vmess: string): ClashProxy {
@@ -53,8 +54,15 @@ export default {
 		}
 
 		let jms_url = searchParams['jms'];
+
+		let use_rule_providers = false;
+
+		if (searchParams['use_rule_providers']) {
+			use_rule_providers = searchParams['use_rule_providers'] === 'true';
+		}
+		
 		for (let key in searchParams) {
-			if (key !== 'jms') {
+			if (key !== 'jms' && key !== 'use_rule_providers') {
 				jms_url += `&${key}=${searchParams[key]}`;
 			}
 		}
@@ -75,15 +83,16 @@ export default {
 
 		const proxies = jms_arr.map((line) => (line.startsWith('ss://') ? parseSS(line) : parseVmess(line)));
 		const base_proxy_names = proxies.map((proxy) => proxy.name);
-		const {rules, ['rule-providers']: ruleProviders} = ruleSet;
+		const {rules:ruleProviderRefs, ['rule-providers']: ruleProviders} = ruleSet;
 		const clashYaml: ClashYaml = {
+			...meta,
 			proxies,
 			'proxy-groups': [
 				{ name: 'PROXY', type: 'select', proxies: ['AUTO', ...base_proxy_names]},
 				{ name: 'AUTO', type: 'url-test', proxies: base_proxy_names, url: 'http://www.gstatic.com/generate_204', interval: 300, tolerance: 1000 },
 			],
-			rules,
-			'rule-providers': ruleProviders,
+			rules: use_rule_providers ? ruleProviderRefs.concat(rules) : rules,
+			...(use_rule_providers ? {['rule-providers']: ruleProviders} : {}),
 		};
 		return new Response(yaml.dump(clashYaml), {
 			headers: {

@@ -10,7 +10,7 @@ type ClashYaml = {
 		tolerance?: number;
 	}[];
 	rules: string[];
-	['rule-providers']: Record<string, Record<string, string | number>>;
+	['rule-providers']?: Record<string, Record<string, string | number>>;
 };
 
 type ClashProxy = {

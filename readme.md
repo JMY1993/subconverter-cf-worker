@@ -9,6 +9,13 @@ A Cloudflare Worker implementation of subconverter for converting between differ
 - Built with TypeScript and modern tooling
 - Fast and efficient processing
 
+## how to use
+
+- make a GET request to the url
+- put a query with key `jms` of the jms subscription url
+- optionally set `use_rule_providers=true` if you want to include provider set into it
+- if no rule providers are provided, the converter will generate a config file that will proxy all the non-cn url and ip address
+
 ## 📝 Prerequisites
 
 - Node.js 18.0.0 or higher

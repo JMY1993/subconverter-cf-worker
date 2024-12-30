@@ -1,0 +1,10 @@
+export default {
+    port: 7890,
+    "socks-port": 7891,
+    "redir-port": 7892,
+    "allow-lan": true,
+    "mode": "rule",
+    "log-level": "info",
+    'external-controller': '0.0.0.0:9090',
+    secret: ""
+}
