@@ -11,7 +11,7 @@
  * todo: feature to provide a ui to edit the generated configuration.
  */
 import yaml from 'js-yaml';
-import rules, {ruleSet} from './rules';
+import defaultRules, { ruleSet } from './rules';
 import { ClashProxy, ClashYaml } from './types';
 import meta from './meta';
 
@@ -57,10 +57,17 @@ export default {
 
 		let use_rule_providers = false;
 
+		let customRules: string[] = [];
+
 		if (searchParams['use_rule_providers']) {
 			use_rule_providers = searchParams['use_rule_providers'] === 'true';
 		}
-		
+
+		if (searchParams['rules']) {
+			customRules = searchParams['rules'].split(';');
+			console.log(customRules);
+		}
+
 		for (let key in searchParams) {
 			if (key !== 'jms' && key !== 'use_rule_providers') {
 				jms_url += `&${key}=${searchParams[key]}`;
@@ -72,7 +79,7 @@ export default {
 		if (!jms_response.ok) {
 			return new Response(jms_text, { status: jms_response.status });
 		}
-		
+
 		const jms_decoded = atob(jms_text);
 		const jms_arr = jms_decoded.split('\n');
 		jms_arr.forEach((line, index) => {
@@ -83,16 +90,17 @@ export default {
 
 		const proxies = jms_arr.map((line) => (line.startsWith('ss://') ? parseSS(line) : parseVmess(line)));
 		const base_proxy_names = proxies.map((proxy) => proxy.name);
-		const {rules:ruleProviderRefs, ['rule-providers']: ruleProviders} = ruleSet;
+		const { rules: ruleProviderRefs, ['rule-providers']: ruleProviders } = ruleSet;
+		const rules = [...defaultRules, ...customRules, 'MATCH,PROXY']
 		const clashYaml: ClashYaml = {
 			...meta,
 			proxies,
 			'proxy-groups': [
-				{ name: 'PROXY', type: 'select', proxies: ['AUTO', ...base_proxy_names]},
+				{ name: 'PROXY', type: 'select', proxies: ['AUTO', ...base_proxy_names] },
 				{ name: 'AUTO', type: 'url-test', proxies: base_proxy_names, url: 'http://www.gstatic.com/generate_204', interval: 300, tolerance: 1000 },
 			],
 			rules: use_rule_providers ? ruleProviderRefs.concat(rules) : rules,
-			...(use_rule_providers ? {['rule-providers']: ruleProviders} : {}),
+			...(use_rule_providers ? { ['rule-providers']: ruleProviders } : {}),
 		};
 		return new Response(yaml.dump(clashYaml), {
 			headers: {

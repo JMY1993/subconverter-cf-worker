@@ -2,7 +2,7 @@
 // it is a json file converted from yaml, the original yaml file is located at https://github.com/Loyalsoldier/clash-rules
 // this approach is to avoid the need to parse yaml in the worker and ensure the worker is as fast as possible and still leverage the typescript type checking
 
-export default ['DOMAIN,clash.razord.top,DIRECT', 'DOMAIN,yacd.haishan.me,DIRECT', 'GEOIP,LAN,DIRECT', 'GEOIP,CN,DIRECT', 'MATCH,PROXY'];
+export default ['DOMAIN,clash.razord.top,DIRECT', 'DOMAIN,yacd.haishan.me,DIRECT', 'GEOIP,LAN,DIRECT', 'GEOIP,CN,DIRECT'];
 
 export const ruleSet = {
 	rules: [
